@@ -7,6 +7,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -41,8 +42,10 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -54,12 +57,18 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button btn_Worldwide, btn_district, btn_prediction;
+    private Button btn_Worldwide, btn_district, btn_prediction,btn_testcenter;
     public static TextView tv_Location;
     public static TextView tv_totalcases, tv_activecases, tv_totalrecovery, tv_totaldeaths,tv_newrecovery,tv_newdeaths;
+    public static String Locality;
     String data = "";
     String url = "https://api.covid19api.com/summary";
     String result = "";
@@ -71,10 +80,10 @@ public class MainActivity extends AppCompatActivity {
     LocationListener locationListener;
     FusedLocationProviderClient fusedLocationProviderClient;
 
-    public static ArrayList<String> CountryName;
-    public static ArrayList<String> CountryData;
-
     public static ArrayList<GlobalDataFetch>Country_Data;
+
+    DatabaseReference ref;
+    public static Map<String,ArrayList<String>> map;
 
 
 
@@ -87,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
         btn_Worldwide = (Button) findViewById(R.id.Worldwide_btn);
         btn_district = (Button) findViewById(R.id.district_btn);
         btn_prediction = (Button) findViewById(R.id.prediction_btn);
+        btn_testcenter=(Button)findViewById(R.id.testcenters_btn);
         tv_Location = (TextView) findViewById(R.id.Location_tv);
         tv_totalcases = (TextView) findViewById(R.id.totalcase_tv);
         tv_activecases = (TextView) findViewById(R.id.activecases_tv);
@@ -114,14 +124,28 @@ public class MainActivity extends AppCompatActivity {
             if(ActivityCompat.checkSelfPermission(MainActivity.this,
                     Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED)
             {
-                getLocation();
+                if(ActivityCompat.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE)==PackageManager.PERMISSION_GRANTED)
+                {
+                    getLocation();
+                }
+                else
+                {
+                    ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},PackageManager.PERMISSION_GRANTED);
+                }
+
             }else {
                 ActivityCompat.requestPermissions(MainActivity.this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},44);
             }
 
-
+            //Volley Request for fetching global json data
             mQueue = Volley.newRequestQueue(this);
+
+            //Initialising the map and database ref
+            map=new HashMap<String,ArrayList<String>>();
+            ref= FirebaseDatabase.getInstance().getReference().child("Test Centers");
+            //TestCenter Data Fetch Fuction Call
+            TestCenterData();
 
 
             btn_Worldwide.setOnClickListener(new View.OnClickListener() {
@@ -136,6 +160,13 @@ public class MainActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     Intent DistrictIntent = new Intent(MainActivity.this, District.class);
                     startActivity(DistrictIntent);
+                }
+            });
+            btn_testcenter.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent testcenter = new Intent(MainActivity.this, TestCenter.class);
+                    startActivity(testcenter);
                 }
             });
 
@@ -158,13 +189,13 @@ public class MainActivity extends AppCompatActivity {
                         //et_Location.setText(addresses.get(0).getCountryName());
                         Toast.makeText(MainActivity.this, "Country Name : "+addresses.get(0).getCountryName(), Toast.LENGTH_SHORT).show();
 
-                        String Locality=addresses.get(0).getAdminArea();
+                        Locality=addresses.get(0).getAdminArea().toLowerCase().trim();
 
                         String subloc=addresses.get(0).getSubAdminArea();
 
-                        Toast.makeText(MainActivity.this, "Admin Area : "+Locality, Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(MainActivity.this, "Admin Area : "+Locality, Toast.LENGTH_SHORT).show();
 
-                        Toast.makeText(MainActivity.this, "sub Admin Area : "+subloc, Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(MainActivity.this, "sub Admin Area : "+subloc, Toast.LENGTH_SHORT).show();
                         jsonParse();
 
                     } catch (IOException e) {
@@ -230,6 +261,62 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         mQueue.add(request);
+    }
+    private void TestCenterData()
+    {
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot)
+            {
+                for(DataSnapshot ds:dataSnapshot.getChildren())
+                {
+                    String State=ds.getKey().toLowerCase().trim();
+                    ArrayList<String>temp=new ArrayList<>();
+                    //temp=map.get(State);
+                    for(DataSnapshot ds1:ds.getChildren())
+                    {
+
+                        String Test_center= (String) ds1.getValue();
+                        String Area=ds1.getKey();
+                        String value=(Test_center+" , ")+Area;
+                        // Toast.makeText(TestCenter.this, " Test Center  : "+value, Toast.LENGTH_SHORT).show();
+                       // Toast.makeText(MainActivity.this, "Area : " + Area, Toast.LENGTH_SHORT).show();
+                        temp.add(value);
+                    }
+                    map.put(State,temp);
+                    //Toast.makeText(MainActivity.this, "State : "+State, Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(MainActivity.this, "Value : "+map.get(State), Toast.LENGTH_SHORT).show();
+                }
+                //Toast.makeText(MainActivity.this, "Value : "+map.get(Locality), Toast.LENGTH_SHORT).show();
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+
+    }
+
+    private void jsonDistrict()
+    {
+        String url="https://api.covid19india.org/state_district_wise.json";
+        JsonObjectRequest req=new JsonObjectRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response)
+                    {
+
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        });
     }
 
     private boolean isConnected() {

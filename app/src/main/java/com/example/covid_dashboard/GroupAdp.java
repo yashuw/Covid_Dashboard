@@ -89,8 +89,6 @@ public class GroupAdp extends RecyclerView.Adapter<GroupAdp.ViewHolder> implemen
         //set Adapter
         holder.rvMember.setAdapter(adapterMember);
 
-
-
     }
 
     @Override

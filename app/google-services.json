@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "760083855714",
+    "firebase_url": "https://covid-dashboard-498b0.firebaseio.com",
+    "project_id": "covid-dashboard-498b0",
+    "storage_bucket": "covid-dashboard-498b0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:760083855714:android:815f552d5e1d88380d543b",
+        "android_client_info": {
+          "package_name": "com.example.covid_dashboard"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "760083855714-mj14l61898702sjhim2u5dvvrdhi9hm0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.covid_dashboard",
+            "certificate_hash": "bda1960f8439e47b03915e76d7f23916c4d3033d"
+          }
+        },
+        {
+          "client_id": "760083855714-me0vjbtj3eeu2gummt7jkoqa0fo1qviu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDnCt3wsmk011he3tNeiBlXH6CpYYFRNDU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "760083855714-me0vjbtj3eeu2gummt7jkoqa0fo1qviu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

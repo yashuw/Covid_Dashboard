@@ -54,7 +54,7 @@ public class GroupAdpTestCenter extends RecyclerView.Adapter<GroupAdpTestCenter.
         TestCenterList.addAll(MainActivity.map.get(StateName.get(position)));
         //TestCenterList.add("Hello");
 
-        MemberAdp adapterMember =new MemberAdp(TestCenterList);
+        MemberAdpTestCenter adapterMember =new MemberAdpTestCenter(TestCenterList);
 
         //Initialize layout manager
         LinearLayoutManager layoutManagerMember=new LinearLayoutManager(activity);

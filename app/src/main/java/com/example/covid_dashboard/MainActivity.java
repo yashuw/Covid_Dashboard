@@ -8,6 +8,7 @@ import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -43,6 +44,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -74,22 +76,36 @@ public class MainActivity extends AppCompatActivity {
     String result = "";
     String Country_Loc;
     private RequestQueue mQueue;
+    private RequestQueue dQueue;
     String userCountry = "unkonown ";
     public static JSONArray jsonArray;
     LocationManager locationManager;
     LocationListener locationListener;
     FusedLocationProviderClient fusedLocationProviderClient;
+    String subloc;
 
     public static ArrayList<GlobalDataFetch>Country_Data;
 
     DatabaseReference ref;
     public static Map<String,ArrayList<String>> map;
 
+    public static Map<String,JSONObject>DistrictDataFetch;
 
+    //Progress Dialog
+    ProgressDialog progressDialog;
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
 //        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 //        StrictMode.setThreadPolicy(policy);
         setContentView(R.layout.activity_main);
@@ -102,9 +118,11 @@ public class MainActivity extends AppCompatActivity {
         tv_activecases = (TextView) findViewById(R.id.activecases_tv);
         tv_totalrecovery = (TextView) findViewById(R.id.totalrecovery_tv);
         tv_totaldeaths = (TextView) findViewById(R.id.totaldeaths_tv);
-        tv_newdeaths=(TextView)findViewById(R.id.newdeath_tv);
-        tv_newrecovery=(TextView)findViewById(R.id.newrecovery_tv);
+//        tv_newdeaths=(TextView)findViewById(R.id.newdeath_tv);
+//        tv_newrecovery=(TextView)findViewById(R.id.newrecovery_tv);
         Country_Data=new ArrayList<>();
+
+
         if (!isConnected()) {
             new AlertDialog.Builder(this)
                     .setIcon(android.R.drawable.ic_dialog_alert)
@@ -117,40 +135,69 @@ public class MainActivity extends AppCompatActivity {
                         }
                     })
                     .show();
-        } else {
-            Toast.makeText(this, "In else ", Toast.LENGTH_SHORT).show();
-            //Initialize fusedLocation provider
-            fusedLocationProviderClient= LocationServices.getFusedLocationProviderClient(this);
-            if(ActivityCompat.checkSelfPermission(MainActivity.this,
-                    Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED)
-            {
-                if(ActivityCompat.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE)==PackageManager.PERMISSION_GRANTED)
-                {
-                    getLocation();
-                }
-                else
-                {
-                    ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},PackageManager.PERMISSION_GRANTED);
-                }
+        }
+        else {
 
-            }else {
+            //Toast.makeText(this, "In else ", Toast.LENGTH_SHORT).show();
+
+            //---------------------------------------Permission Check -------------------------------------------
+
+            //------------------Initialize fusedLocation provider----------------------
+
+            fusedLocationProviderClient= LocationServices.getFusedLocationProviderClient(this);
+            if((ActivityCompat.checkSelfPermission(MainActivity.this,
+                    Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED))
+            {
+                //---------------------------------------Progress Bar Start Function -------------------------------------
+                StartingProgressBar();
+                getLocation();
+
+           }
+            else {
+                //Toast.makeText(this, "In second else ", Toast.LENGTH_SHORT).show();
                 ActivityCompat.requestPermissions(MainActivity.this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},44);
             }
 
-            //Volley Request for fetching global json data
-            mQueue = Volley.newRequestQueue(this);
+
+
+            //----------------------------District Data------------------------------------------------
+
+            //Initializing map for storing District Data
+            DistrictDataFetch=new HashMap<String, JSONObject>();
+
+            //Volley Request for fetching District json data
+            dQueue=Volley.newRequestQueue(this);
 
             //Initialising the map and database ref
             map=new HashMap<String,ArrayList<String>>();
+
+
+
+            //----------------------------Country Wise Data  ----------------------------------------------
+
+            //Volley Request for fetching global json data
+            mQueue = Volley.newRequestQueue(this);
+
+
+            //Country Wise Data Fetch Function Call
+            jsonParse();
+
+            //----------------------------Test Centers Data-------------------------------------------------
+
             ref= FirebaseDatabase.getInstance().getReference().child("Test Centers");
             //TestCenter Data Fetch Fuction Call
             TestCenterData();
 
 
+            //-----------------------------Button Click Listeners-------------------------------------------
+
             btn_Worldwide.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    //Toast.makeText(this, "Data Parse : ", Toast.LENGTH_SHORT).show();
+
+
                     Intent WorldwideIntent = new Intent(MainActivity.this, Recycler_View.class);
                     startActivity(WorldwideIntent);
                 }
@@ -160,11 +207,14 @@ public class MainActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     Intent DistrictIntent = new Intent(MainActivity.this, District.class);
                     startActivity(DistrictIntent);
+
+
                 }
             });
             btn_testcenter.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+
                     Intent testcenter = new Intent(MainActivity.this, TestCenter.class);
                     startActivity(testcenter);
                 }
@@ -173,7 +223,26 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+    //-------------------------------------------Progress Bar -------------------------------------------
 
+    private void StartingProgressBar() {
+        //Intialising Progress Dialog
+        progressDialog=new ProgressDialog(MainActivity.this);
+
+        //show Dialog
+        progressDialog.show();
+
+        //set content view
+        progressDialog.setContentView(R.layout.progress_dialog);
+
+        //Set Transparent Background
+
+        progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+        progressDialog.setCancelable(false);
+    }
+
+    //----------------------------------------User Current Loc Function ---------------------------------
     private void getLocation()
     {
         fusedLocationProviderClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<Location>() {
@@ -187,16 +256,21 @@ public class MainActivity extends AppCompatActivity {
                         List<Address> addresses=geocoder.getFromLocation(location.getLatitude(),location.getLongitude(),1);
                         userCountry=addresses.get(0).getCountryCode();
                         //et_Location.setText(addresses.get(0).getCountryName());
-                        Toast.makeText(MainActivity.this, "Country Name : "+addresses.get(0).getCountryName(), Toast.LENGTH_SHORT).show();
+                       // Toast.makeText(MainActivity.this, "Country Name : "+addresses.get(0).getCountryName(), Toast.LENGTH_SHORT).show();
 
-                        Locality=addresses.get(0).getAdminArea().toLowerCase().trim();
+                        Locality=addresses.get(0).getAdminArea().toUpperCase().trim();
 
-                        String subloc=addresses.get(0).getSubAdminArea();
+                        subloc=addresses.get(0).getSubAdminArea().trim();
+
 
                         //Toast.makeText(MainActivity.this, "Admin Area : "+Locality, Toast.LENGTH_SHORT).show();
 
-                        //Toast.makeText(MainActivity.this, "sub Admin Area : "+subloc, Toast.LENGTH_SHORT).show();
-                        jsonParse();
+                        //Toast.makeText(MainActivity.this, "sub Admin Area  : "+subloc, Toast.LENGTH_SHORT).show();
+
+                        //District Wise Data Fetch Function Call
+                        jsonDistrict();
+
+
 
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -205,6 +279,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    //----------------------------------------------------JSON DATA FETCH----------------------------------------
+
+
+    //-------------------------------------------Country Wise Data Fetch Function--------------------------------
 
     private void jsonParse() {
         String url = "https://api.covid19api.com/summary";
@@ -226,28 +305,6 @@ public class MainActivity extends AppCompatActivity {
                                 String NewDeaths=data.getString("NewDeaths");
                                 String TotalDeaths=data.getString("TotalDeaths");
                                 String CountryCode = data.getString("CountryCode");
-                                if (CountryCode.equals(userCountry)) {
-
-                                    tv_Location.setText(Country.toUpperCase());
-                                    tv_activecases.setText(data.getString("NewConfirmed"));
-
-
-                                    tv_totalcases.setText(data.getString("TotalConfirmed"));
-
-
-                                    tv_totaldeaths.setText(data.getString("TotalDeaths"));
-
-
-                                    tv_totalrecovery.setText(data.getString("TotalRecovered"));
-
-
-                                    tv_newdeaths.setText(data.getString("NewDeaths"));
-
-
-                                    tv_newrecovery.setText(data.getString("NewRecovered"));
-
-
-                                }
                                 Country_Data.add( new GlobalDataFetch(Country,TotalCase,NewCases,NewRecovery,TotalRecovery,NewDeaths,TotalDeaths));
                             }
                         } catch (JSONException e) {
@@ -262,6 +319,9 @@ public class MainActivity extends AppCompatActivity {
         });
         mQueue.add(request);
     }
+
+    //-------------------------------------------------Test Center Data Fetch Function-----------------------------------
+
     private void TestCenterData()
     {
         ref.addValueEventListener(new ValueEventListener() {
@@ -296,9 +356,10 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
-
     }
+
+
+    //-------------------------------State Wise Data Fetch Function -----------------------------------------------
 
     private void jsonDistrict()
     {
@@ -308,7 +369,54 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(JSONObject response)
                     {
+                        Iterator<String> Keys=response.keys();
+                        //Toast.makeText(MainActivity.this, "Keys Size : ", Toast.LENGTH_SHORT).show();
+                        String temp=Keys.next();
+                        while(Keys.hasNext())
+                        {
+                            String StateName=Keys.next().toString();
+                            String Name=StateName.toUpperCase();
+                            //Toast.makeText(MainActivity.this, "Keys : "+StateName, Toast.LENGTH_SHORT).show();
+                            try {
+                                JSONObject jsobj=response.getJSONObject(StateName);
+                                JSONObject StateData=jsobj.getJSONObject("districtData");
+                                Iterator<String>keys=StateData.keys();
+                                //Toast.makeText(MainActivity.this, "Sub Keys : "+keys.next(), Toast.LENGTH_SHORT).show();
+                                DistrictDataFetch.put(Name,StateData);
+//                                JSONObject StateDat=DistrictDataFetch.get(StateName.toUpperCase());
+//                                Iterator<String>key=StateDat.keys();
+//                                Toast.makeText(MainActivity.this, "keys : "+key.next(), Toast.LENGTH_SHORT).show();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        //Toast.makeText(MainActivity.this, "locality : "+Locality, Toast.LENGTH_SHORT).show();
+                        JSONObject CurrentStateData=DistrictDataFetch.get(Locality);
+                       // Toast.makeText(MainActivity.this, "sublocality : "+subloc, Toast.LENGTH_SHORT).show();
+                        try {
+                            JSONObject CurrentdistData=CurrentStateData.getJSONObject(subloc);
+                            String DistrictName=subloc.toUpperCase();
+                            String Confirmed=CurrentdistData.getString("confirmed");
+                            String Active=CurrentdistData.getString("active");
+                            String Deceased=CurrentdistData.getString("deceased");
+                            String Recovered= CurrentdistData.getString("recovered");
+                           progressDialog.setCancelable(true);
+                            progressDialog.dismiss();
+                            tv_Location.setText(DistrictName);
+                            tv_activecases.setText(Active);
 
+
+                            tv_totalcases.setText(Confirmed);
+
+
+                            tv_totaldeaths.setText(Deceased);
+
+
+                            tv_totalrecovery.setText(Recovered);
+
+                            } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
 
                     }
                 }, new Response.ErrorListener() {
@@ -317,7 +425,10 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+        dQueue.add(req);
     }
+
+    //--------------------------------------Network connected Check Function----------------------------------
 
     private boolean isConnected() {
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);

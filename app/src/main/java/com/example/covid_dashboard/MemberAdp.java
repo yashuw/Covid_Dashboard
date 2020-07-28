@@ -12,10 +12,10 @@ import java.util.ArrayList;
 public class MemberAdp extends RecyclerView.Adapter<MemberAdp.ViewHolder> {
 
     //Initialize Arraylist
-    ArrayList<String >arrayListMember;
+    ArrayList<TwoValueStorageForMemberAdp >arrayListMember;
 
 
-    public MemberAdp(ArrayList<String> arrayListMember) {
+    public MemberAdp(ArrayList<TwoValueStorageForMemberAdp> arrayListMember) {
 
         this.arrayListMember=arrayListMember;
     }
@@ -32,7 +32,9 @@ public class MemberAdp extends RecyclerView.Adapter<MemberAdp.ViewHolder> {
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
 
-        holder.tvName.setText(arrayListMember.get(position));
+        TwoValueStorageForMemberAdp Data=arrayListMember.get(position);
+        holder.tvName1.setText(Data.getFirst());
+        holder.tvName2.setText(Data.getSecond());
 
     }
 
@@ -43,15 +45,14 @@ public class MemberAdp extends RecyclerView.Adapter<MemberAdp.ViewHolder> {
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        TextView tvName;
+        TextView tvName1;
+        TextView tvName2;
 
         public ViewHolder(View itemView) {
             super(itemView);
 
-            tvName=itemView.findViewById(R.id.tv_name);
-
-
-
+            tvName1=itemView.findViewById(R.id.tv_name1);
+            tvName2=itemView.findViewById(R.id.tv_name2);
         }
     }
 }

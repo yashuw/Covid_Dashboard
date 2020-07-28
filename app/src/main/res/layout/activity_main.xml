@@ -33,8 +33,9 @@
             android:textSize="30sp"/>
     </LinearLayout>
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:orientation="vertical">
         <LinearLayout
             android:layout_width="match_parent"
@@ -45,7 +46,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
-                android:text="Total Cases  : "
+                android:text="Confirmed : "
                 android:textSize="20sp"
                 android:layout_marginRight="4dp"
                 android:layout_marginLeft="10dp"/>
@@ -64,17 +65,40 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
-                android:text="New Cases  : "
+                android:text="Active : "
+                android:layout_marginRight="18dp"
                 android:textSize="20sp"/>
 
             <TextView
                 android:id="@+id/activecases_tv"
                 android:layout_width="70dp"
                 android:layout_height="30dp"
+                android:layout_marginLeft="20dp"
                 android:textColor="@color/black"
                 android:gravity="center"
                 android:background="@drawable/border" />
         </LinearLayout>
+<!--        <LinearLayout-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_gravity="center_horizontal">-->
+
+<!--            <TextView-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="40dp"-->
+<!--                android:layout_gravity="left"-->
+<!--                android:layout_marginLeft="5dp"-->
+<!--                android:text="New Recovery: "-->
+<!--                android:textSize="20sp" />-->
+<!--            <TextView-->
+<!--                android:id="@+id/newrecovery_tv"-->
+<!--                android:layout_width="70dp"-->
+<!--                android:layout_height="30dp"-->
+<!--                android:layout_gravity="right"-->
+<!--                android:textColor="@color/black"-->
+<!--                android:gravity="center"-->
+<!--                android:background="@drawable/border"/>-->
+<!--        </LinearLayout>-->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -85,28 +109,7 @@
                 android:layout_height="40dp"
                 android:layout_gravity="left"
                 android:layout_marginLeft="5dp"
-                android:text="New Recovery: "
-                android:textSize="20sp" />
-            <TextView
-                android:id="@+id/newrecovery_tv"
-                android:layout_width="70dp"
-                android:layout_height="30dp"
-                android:layout_gravity="right"
-                android:textColor="@color/black"
-                android:gravity="center"
-                android:background="@drawable/border"/>
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:layout_gravity="left"
-                android:layout_marginLeft="5dp"
-                android:text="Total Recovery: "
+                android:text="Recovered: "
                 android:textSize="20sp" />
             <TextView
                 android:id="@+id/totalrecovery_tv"
@@ -117,6 +120,24 @@
                 android:gravity="center"
                 android:background="@drawable/border"/>
         </LinearLayout>
+<!--        <LinearLayout-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_gravity="center_horizontal">-->
+<!--            <TextView-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="40dp"-->
+<!--                android:layout_marginLeft="5dp"-->
+<!--                android:text="New Deaths : "-->
+<!--                android:textSize="20sp"/>-->
+<!--            <TextView-->
+<!--                android:id="@+id/newdeath_tv"-->
+<!--                android:layout_width="70dp"-->
+<!--                android:layout_height="30dp"-->
+<!--                android:gravity="center"-->
+<!--                android:textColor="@color/black"-->
+<!--                android:background="@drawable/border"/>-->
+<!--        </LinearLayout>-->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -125,25 +146,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
                 android:layout_marginLeft="5dp"
-                android:text="New Deaths : "
-                android:textSize="20sp"/>
-            <TextView
-                android:id="@+id/newdeath_tv"
-                android:layout_width="70dp"
-                android:layout_height="30dp"
-                android:gravity="center"
-                android:textColor="@color/black"
-                android:background="@drawable/border"/>
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:layout_marginLeft="5dp"
-                android:text="Total Deaths : "
+                android:text="Deceased : "
                 android:textSize="20sp"/>
             <TextView
                 android:id="@+id/totaldeaths_tv"
@@ -153,6 +156,11 @@
                 android:textColor="@color/black"
                 android:background="@drawable/border"/>
         </LinearLayout>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

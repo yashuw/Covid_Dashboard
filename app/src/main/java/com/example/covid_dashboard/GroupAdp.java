@@ -63,20 +63,20 @@ public class GroupAdp extends RecyclerView.Adapter<GroupAdp.ViewHolder> implemen
         holder.tvName.setText(obj.getCountry_Name());
 
         //Intialize member arraylist
-         ArrayList<String>arrayListMember=new ArrayList<>();
-         //Using for loop to add multiple member
+         ArrayList<TwoValueStorageForMemberAdp>arrayListMember=new ArrayList<>();
 
-        arrayListMember.add("Total Cases : "+obj.getTotal_Case());
 
-        arrayListMember.add("New Cases : "+obj.getNew_Cases());
+        arrayListMember.add(new TwoValueStorageForMemberAdp("Total Cases : "+obj.getTotal_Case(),
+                "New Cases : "+obj.getNew_Cases()));
 
-        arrayListMember.add("New Deaths : "+obj.getNew_Deaths());
 
-        arrayListMember.add("Total Deaths : "+obj.getTotal_Deaths());
+        arrayListMember.add(new TwoValueStorageForMemberAdp("New Deaths : "+obj.getNew_Deaths(),
+                "Total Deaths : "+obj.getTotal_Deaths()));
 
-        arrayListMember.add("New Recovered : "+obj.getNew_Recovery());
 
-        arrayListMember.add("Total Recovered : "+obj.getTotal_Recovery());
+        arrayListMember.add(new TwoValueStorageForMemberAdp("New Recover : "+obj.getNew_Recovery(),
+                "Recovered : "+obj.getTotal_Recovery()));
+
         //Initialize member adapter
         MemberAdp adapterMember =new MemberAdp(arrayListMember);
 

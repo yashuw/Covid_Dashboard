@@ -5,10 +5,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.Activity;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.pdf.PdfDocument;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.Menu;
@@ -28,7 +24,7 @@ import java.util.Set;
 
 
 public class TestCenter extends AppCompatActivity {
-    private TextView full_list_tv;
+
     RecyclerView rvgrp;
     GroupAdpTestCenter adapterGroup;
 
@@ -39,8 +35,6 @@ public class TestCenter extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_testcenter);
-
-        full_list_tv=(TextView)findViewById(R.id.list_click_tv);
         rvgrp=findViewById(R.id.rv_group_testcenter);
 
         TestCenterState=new ArrayList<>();
@@ -51,36 +45,6 @@ public class TestCenter extends AppCompatActivity {
 
         }
         //Initialize layout manager
-
-
-//        full_list_tv.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                PdfDocument mypdf=new PdfDocument();
-//                Paint mypaint=new Paint();
-//
-//                PdfDocument.PageInfo mypageInfo=new PdfDocument.PageInfo.Builder(250,400,1).create();
-//                PdfDocument.Page mypage1=mypdf.startPage(mypageInfo);
-//
-//                Canvas canvas=mypage1.getCanvas();
-//
-//                mypaint.setTextAlign(Paint.Align.CENTER);
-//                mypaint.setTextSize(16f);
-//                canvas.drawText("LIST OF TEST CENTERS IN INDIA",mypageInfo.getPageWidth()/2,40,mypaint);
-//
-//                mypdf.finishPage(mypage1);
-//
-//                File file=new File(Environment.getExternalStorageDirectory(),"/TestCenterList.pdf");
-//
-//                try {
-//                    mypdf.writeTo(new FileOutputStream(file));
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//                mypdf.close();
-//
-//            }
-//        });
         adapterGroup =new GroupAdpTestCenter(this,TestCenterState);
 
         //Initialize layout manager
